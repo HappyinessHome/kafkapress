@@ -3,6 +3,7 @@ package com.kafkapress.kafkapress.start;
 import com.kafkapress.kafkapress.config.KafkaConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -10,6 +11,7 @@ import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,12 +36,13 @@ public class StartUpProcess implements ApplicationListener<ContextRefreshedEvent
         log.info("开始执行压测kafka程序,当前配置的发送主题为:[{}],发送线程数为:[{}],发送数据大小为:[{}],每个线程循环次数为:[{}]",kafkaConfig.getTopic(),kafkaConfig.getThreads(),kafkaConfig.getData().getBytes().length,kafkaConfig.getNums());
         long outStart=System.currentTimeMillis();
         List<CompletableFuture<Double>> list=new ArrayList<>();
+
         for(int i=0;i<kafkaConfig.getThreads();i++){
 
             CompletableFuture<Double> doubleCompletableFuture = CompletableFuture.supplyAsync(() -> {
                 long start = System.currentTimeMillis();
                 for(int j=0;j<kafkaConfig.getNums();j++){
-                    kafkaTemplate.send(kafkaConfig.getTopic(), UUID.randomUUID().toString().substring(0,5),kafkaConfig.getData());
+                    kafkaTemplate.send(kafkaConfig.getTopic(),String.format("%s-%s", UUID.randomUUID().toString().substring(0,5), LocalDateTime.now()),kafkaConfig.getData());
                 }
                 long end = System.currentTimeMillis();
                 double bytes=kafkaConfig.getData().getBytes().length*kafkaConfig.getNums();
