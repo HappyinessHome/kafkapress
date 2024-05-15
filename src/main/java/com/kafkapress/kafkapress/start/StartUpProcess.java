@@ -3,7 +3,9 @@ package com.kafkapress.kafkapress.start;
 import com.kafkapress.kafkapress.config.KafkaConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Component
-public class StartUpProcess implements ApplicationListener<ContextStartedEvent> {
+public class StartUpProcess implements ApplicationListener<ContextRefreshedEvent> {
     private KafkaConfig kafkaConfig;
     private KafkaTemplate<String,String> kafkaTemplate;
     @Autowired
@@ -25,8 +27,10 @@ public class StartUpProcess implements ApplicationListener<ContextStartedEvent> 
         this.kafkaConfig=kafkaConfig;
         this.kafkaTemplate=kafkaTemplate;
     }
+
+
     @Override
-    public void onApplicationEvent(ContextStartedEvent event) {
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         log.info("开始执行压测kafka程序,当前配置的发送主题为:[{}],发送线程数为:[{}],发送数据大小为:[{}],每个线程循环次数为:[{}]",kafkaConfig.getTopic(),kafkaConfig.getThreads(),kafkaConfig.getData().getBytes().length,kafkaConfig.getNums());
         long outStart=System.currentTimeMillis();
         List<CompletableFuture<Double>> list=new ArrayList<>();

@@ -12,4 +12,6 @@ public class KafkaConfig {
     private int threads=1;
     private String data;
     private int nums=1;
+    private String servers;
+    private int batchSize=16;
 }
