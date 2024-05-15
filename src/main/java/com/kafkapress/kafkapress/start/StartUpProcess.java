@@ -42,8 +42,9 @@ public class StartUpProcess implements ApplicationListener<ContextRefreshedEvent
                     kafkaTemplate.send(kafkaConfig.getTopic(), UUID.randomUUID().toString().substring(0,5),kafkaConfig.getData());
                 }
                 long end = System.currentTimeMillis();
-
-                double speed = (kafkaConfig.getData().getBytes().length*kafkaConfig.getNums()) / ((end - start) / 1000);
+                double bytes=kafkaConfig.getData().getBytes().length*kafkaConfig.getNums();
+                double time=(end - start) / 1000.0;
+                double speed = bytes/time;
                 return speed;
             });
             list.add(doubleCompletableFuture);
@@ -61,6 +62,6 @@ public class StartUpProcess implements ApplicationListener<ContextRefreshedEvent
         });
         long outEnd = System.currentTimeMillis();
 
-        log.info("写入完成共耗时:[{}]ms,平均写入速率为:[{}],",outEnd-outStart,avgdouble.get()/kafkaConfig.getThreads());
+        log.info("写入完成共耗时:[{}]ms,平均写入速率为:[{}]bytes/ms,",outEnd-outStart,avgdouble.get()/kafkaConfig.getThreads());
     }
 }
